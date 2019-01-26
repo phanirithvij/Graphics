@@ -209,8 +209,8 @@ void tick_elements() {
 
 void on_Collide_jetpack_player(){
     //restrict jetpack to move further
+    jet.position.x = player.position.x - (jet.width /2.0 + player.width / 2.0);
 }
-
 
 void initGL(GLFWwindow *window, int width, int height){
     /* Objects should be created before any other gl function and shaders */
@@ -305,8 +305,6 @@ void detect_collisions_all(){
             coins[i].position.y = -2;
         }
     }
-
-
 
     //player and firebeam or fireangledbeam
 
