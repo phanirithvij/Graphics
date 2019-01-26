@@ -14,7 +14,7 @@ Balloon::Balloon(float x, float y, color_t color) {
     gravityY = 0.00003f;
     initPosY = y;
 
-    int n = 12;
+    int n = 20;
     speedY = 0.01f; // TODO rand speed
 
     GLfloat vertex_buffer_data[9*n];

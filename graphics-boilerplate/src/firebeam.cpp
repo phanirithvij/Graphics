@@ -63,8 +63,11 @@ void FireBeam::set_position(float x, float y) {
 
 bool FireBeam::onscreen(){
     // std::cout << "FireBeam on screen" << std::endl;
-    bool retval_ = (this->position.x < screen_center_x + 4.0) && (this->position.x > screen_center_x - 4.0)
-        && (this->position.y < screen_center_y + 4.0) && (this->position.y > screen_center_y - 4.0);
+    bool retval_ = 
+            (this->position.x - (width / 2.0 + part_radius) < screen_center_x + 4.0)
+         && (this->position.x + (width / 2.0 + part_radius) > screen_center_x - 4.0)
+         && (this->position.y < screen_center_y + 4.0) 
+         && (this->position.y > screen_center_y - 4.0);
     if (retval_)
     // std::cout << "Damn " << retval_ << std::endl;
     return retval_;

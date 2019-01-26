@@ -1,7 +1,13 @@
 #include "magnet.h"
+#include "player.h"
+#include "jetpack.h"
 #include "main.h"
 #include "stdlib.h"
 #include <iostream>
+#include "collisionfuncs.h"
+
+extern Player player;
+extern Jetpack jet;
 
 Magnet::Magnet(float x, float y, float radius, color_t color) {
     this->position = glm::vec3(x, y, 0);
@@ -48,6 +54,16 @@ Magnet::Magnet(float x, float y, float radius, color_t color) {
     this->object2 = create3DObject(GL_TRIANGLES, (n/2) * 3, vertex_buffer_data2, COLOR_BACKGROUND, GL_FILL);
 }
 
+void Magnet::actforces(){
+    double dist = distPoints(player.position.x, player.position.y, position.x, position.y);
+    if (dist < 4 && dist > 0.4){
+        jet.position.x += -(1 / pow(dist + 1, 3)) * (jet.position.x - position.x);
+        jet.position.y += -(1 / pow(dist + 1, 3)) * (jet.position.y - position.y);
+
+        player.position.x += -(1 / pow(dist + 1, 3)) * (player.position.x - position.x);
+        player.position.y += -(1 / pow(dist + 1, 3)) * (player.position.y - position.y);
+    }
+}
 
 void Magnet::draw(glm::mat4 VP) {
     Matrices.model = glm::mat4(1.0f);
@@ -92,11 +108,8 @@ bool Magnet::visited(){
     return (this->position.x < screen_center_x - 4.0);
 }
 
-void Magnet::tick(float speed) {
-    // std::cout << "ticking" << std::endl;
-    // this->rotation += speed;
-    // this->position.x -= speed;
-    // this->position.y -= speed;
+void Magnet::tick() {
+    actforces();
 }
 
 bounding_box_t Magnet::bounding_box() {

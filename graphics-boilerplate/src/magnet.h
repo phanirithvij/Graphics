@@ -12,12 +12,13 @@ public:
     void draw(glm::mat4 VP);
     void draw(glm::mat4 VP, float xoffset);
     void set_position(float x, float y);
-    void tick(float speed);
+    void tick();
     double speed;
     double width;
     double height;
     bool onscreen();
     bool visited();
+    void actforces();
     color_t color;
     bounding_box_t bounding_box();
 private:

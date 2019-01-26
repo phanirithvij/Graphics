@@ -13,6 +13,8 @@
 #include "fireangledBeam.h"
 #include "magnet.h"
 #include "collisionfuncs.h"
+#include "boomerang.h"
+#include "powerup_shield.h"
 #include <chrono>
 
 #include "GL/glut.h"
@@ -32,6 +34,8 @@ Platform plat;
 Jetpack jet;
 Balloon showballoon;
 FireBeamAngled fbangled;
+Boomerang boom;
+PowerupShield sheild;
 
 vector<Jetparticle> j_particles;
 vector<Balloon> balloonlist;
@@ -61,11 +65,12 @@ void draw() {
 
     // Eye - Location of camera. Don't change unless you are sure!!
     glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f), 0, 5*sin(camera_rotation_angle*M_PI/180.0f) );
-    // glm::vec3 eye ( 10*cos(camera_rotation_angle*M_PI/180.0f) + player.position.x, player.position.y, 10*sin(camera_rotation_angle*M_PI/180.0f) );
+    // glm::vec3 eye (player.position.x, player.position.y, 5);
+    // glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f) + player.position.x, player.position.y, 5*sin(camera_rotation_angle*M_PI/180.0f) );
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
+    // glm::vec3 target (player.position.x, player.position.y, 0);
     glm::vec3 target (0, 0, 0);
 
-    // glm::vec3 target (0, player.position.x, player.position.y);
     // Compute Camera matrix (view)
     Matrices.view = glm::lookAt( eye, target, up ); // Rotating Camera for 3D
     // Don't change unless you are sure!!
@@ -83,13 +88,6 @@ void draw() {
     // Scene render
     plat.draw(VP);
 
-    for (int i = 0; i < coins.size(); i++){
-        if (coins[i].onscreen()){ //  && !coins[i].visited()
-            // cout << "Bazinga " << i << endl;
-            coins[i].draw(VP);
-        }
-    }
-
     for (int i = j_particles.size() -1; i > -1 ; i--){
         if (j_particles[i].canDelete()){
             j_particles.erase(j_particles.begin() + i); // delete the particle
@@ -106,7 +104,16 @@ void draw() {
         firebeams[i].draw(VP);
     }
 
+    for (int i = 0; i < coins.size(); i++){
+        if (coins[i].onscreen()){ //  && !coins[i].visited()
+            // cout << "Bazinga " << i << endl;
+            coins[i].draw(VP);
+        }
+    }
+
     fbangled.draw(VP);
+
+    sheild.draw(VP);
 
     player.draw(VP);
     showballoon.draw(VP);
@@ -126,6 +133,8 @@ void draw() {
             balloonlist[i].draw(VP);
         }
     }
+
+    boom.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -224,6 +233,22 @@ void tick_elements() {
     for (int i=0; i < firebeams.size(); i++){
         firebeams[i].tick();
     }
+
+    for (int i=0; i < magnets.size(); i++){
+        if (magnets[i].onscreen()){
+            magnets[i].tick();
+        }
+        if (magnets[i].visited()){
+            magnets.erase(magnets.begin() + i);
+        }
+    }
+
+    boom.tick();
+
+    if (!boom.onscreen()){
+        cout << "Boom respawning" << endl;
+        boom.refresh();
+    }
     // camera_rotation_angle += 1;
     // cout << camera_rotation_angle << endl;
 }
@@ -241,6 +266,8 @@ void initGL(GLFWwindow *window, int width, int height){
     player         = Player(-2.0f, 0.0f, COLOR_MIDNIGHTBLUE);
     jet            = Jetpack(-2.0f, 0.0f, COLOR_JETPACK);
     showballoon    = Balloon(-2.0 - (player.width / 2.0), 0.0, COLOR_SKYBLUE);
+    boom           = Boomerang(4, 3, COLOR_RED2);
+    sheild         = PowerupShield(1,1, COLOR_GREY);
 
     int num_coins = 100;
 
@@ -270,8 +297,8 @@ void initGL(GLFWwindow *window, int width, int height){
         firebeams.push_back(firebeam);
     }
 
-    for (int i=0; i < 1 ; i++){
-        Magnet m_mag = Magnet(i * 10, 0, 0.5, COLOR_MAGNET);
+    for (int i=1; i < 7 ; i++){
+        Magnet m_mag = Magnet(i * 10, 3 + ydist(gen), 0.5, COLOR_MAGNET);
         magnets.push_back(m_mag);
     }
     
@@ -302,6 +329,11 @@ bool detect_collision_waterballoon_firebeam(const Balloon &wb, const FireBeam &f
     return detected;
 }
 
+bool detect_collision_player_boom(Boomerang &boome){
+    bool collided = detect_collision(player.bounding_box(), boome.bounding_box());
+    return collided;
+}
+
 void detect_collisions_all(){
     //jetpack and player
     if (detect_collision(jet.bounding_box(), player.bounding_box())) {
@@ -323,7 +355,7 @@ void detect_collisions_all(){
     //water balloon firebeam or fireangledbeam
     for (int i =0; i < balloonlist.size(); i++){
         for (int j=0; j < firebeams.size(); j++){
-            if (firebeams[j].onscreen()){
+            if (firebeams[j].onscreen() && !firebeams[j].disabled){
                 if (detect_collision_waterballoon_firebeam(balloonlist[i], firebeams[j])){
                     firebeams[j].disabled = true;
                     firebeams[j].refresh();
@@ -351,7 +383,9 @@ void detect_collisions_all(){
         }
     }
     //player and boomerang
-
+    if (detect_collision_player_boom(boom)){
+        cout << "BOOOM" << endl;
+    }
 }
 
 int main(int argc, char **argv) {
@@ -363,6 +397,8 @@ int main(int argc, char **argv) {
     int width  = 1000;
     int height = 1000;
 
+    // int width  = 400;
+    // int height = 400;
     window = initGLFW(width, height);
 
     initGL (window, width, height);
