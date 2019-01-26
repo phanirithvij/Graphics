@@ -41,6 +41,7 @@ void reshapeWindow(GLFWwindow *window, int width, int height);
 
 void on_Collide_jetpack_player();
 void detect_collisions_all();
+bool detect_collision_player_shield();
 
 // Types
 struct VAO {
@@ -84,6 +85,8 @@ void reset_screen();
 
 void createParticles();
 
+void handleLives();
+
 // ---- Colors ----
 extern const color_t COLOR_RED;
 extern const color_t COLOR_GREEN;
@@ -97,5 +100,7 @@ extern const color_t COLOR_JETPACK;
 extern const color_t COLOR_SKYBLUE;
 extern const color_t COLOR_GREY;
 extern const color_t COLOR_RED2;
+extern const color_t COLOR_GOLD;
+extern const color_t COLOR_SILVER;
 
 #endif

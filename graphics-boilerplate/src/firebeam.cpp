@@ -123,6 +123,6 @@ bounding_box_t FireBeam::bounding_box() {
     bbox.y = this->position.y;
     bbox.width = this->width;
     bbox.height = this->height;
-    bbox.type = types_shapes_t::CIRLCE;
+    bbox.type = types_shapes_t::RECTANGLE;
     return bbox;
 }

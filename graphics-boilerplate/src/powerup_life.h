@@ -1,13 +1,13 @@
 #include "main.h"
 
-#ifndef POWERUP_H
-#define POWERUP_H
+#ifndef POWERUP_LIFE_H
+#define POWERUP_LIFE_H
 
 
-class PowerupShield {
+class PowerupLife {
 public:
-    PowerupShield() {}
-    PowerupShield(float x, float y, color_t color);
+    PowerupLife() {}
+    PowerupLife(float x, float y, color_t color);
     glm::vec3 position;
     float rotation;
     void draw(glm::mat4 VP);
@@ -34,4 +34,4 @@ private:
     VAO *object2;
 };
 
-#endif // POWERUP_H
+#endif // POWERUP_LIFE_H

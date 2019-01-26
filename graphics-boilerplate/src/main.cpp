@@ -15,6 +15,7 @@
 #include "collisionfuncs.h"
 #include "boomerang.h"
 #include "powerup_shield.h"
+#include "powerup_life.h"
 #include <chrono>
 
 #include "GL/glut.h"
@@ -36,6 +37,7 @@ Balloon showballoon;
 FireBeamAngled fbangled;
 Boomerang boom;
 PowerupShield sheild;
+PowerupLife life_up;
 
 vector<Jetparticle> j_particles;
 vector<Balloon> balloonlist;
@@ -43,6 +45,7 @@ vector<Coin> coins;
 vector<FireBeam> firebeams;
 vector<FireBeamAngled> fbangledvec;
 vector<Magnet> magnets;
+vector<PowerupLife> showlives;
 
 int score_match = 0;
 
@@ -135,6 +138,11 @@ void draw() {
     }
 
     boom.draw(VP);
+    life_up.draw(VP);
+
+    for (int i =0; i< showlives.size();i++){
+        showlives[i].draw(VP);
+    }
 }
 
 void tick_input(GLFWwindow *window) {
@@ -209,8 +217,23 @@ void createParticles(){
     }
 }
 
+void handleLives(){
+    if (player.lives < 0){
+        cout << "DEAD" << endl;
+        // exit(0);
+    }
+    showlives.clear();
+    for (int i=0; i < player.lives; i++){
+        PowerupLife showli = PowerupLife(screen_center_x + 3.8 - (i * 0.2) , screen_center_y + 4-0.1 , COLOR_RED);
+        showlives.push_back(showli);
+    }
+}
+
+
 void tick_elements() {
     createParticles();
+
+    handleLives();
 
     jet.tick();
     player.tick();
@@ -244,6 +267,8 @@ void tick_elements() {
     }
 
     boom.tick();
+    sheild.tick();
+    life_up.tick();
 
     if (!boom.onscreen()){
         cout << "Boom respawning" << endl;
@@ -253,10 +278,6 @@ void tick_elements() {
     // cout << camera_rotation_angle << endl;
 }
 
-void on_Collide_jetpack_player(){
-    //restrict jetpack to move further
-    jet.position.x = player.position.x - (jet.width /2.0 + player.width / 2.0);
-}
 
 void initGL(GLFWwindow *window, int width, int height){
     /* Objects should be created before any other gl function and shaders */
@@ -267,7 +288,8 @@ void initGL(GLFWwindow *window, int width, int height){
     jet            = Jetpack(-2.0f, 0.0f, COLOR_JETPACK);
     showballoon    = Balloon(-2.0 - (player.width / 2.0), 0.0, COLOR_SKYBLUE);
     boom           = Boomerang(4, 3, COLOR_RED2);
-    sheild         = PowerupShield(1,1, COLOR_GREY);
+    sheild         = PowerupShield(-4, 0, COLOR_GREY);
+    life_up        = PowerupLife(-4 , 3, COLOR_RED2);
 
     int num_coins = 100;
 
@@ -283,8 +305,14 @@ void initGL(GLFWwindow *window, int width, int height){
         double randomX = xdist(gen) * 10;
         double randomY = ydist(gen) * 2;
 
-        Coin coin = Coin(randomX, randomY, 0.2, 0, COLOR_YELLOW);
-        coins.push_back(coin);
+        if (randomY < 4 && randomY > -4 && randomX > screen_center_x - 4){
+            color_t color_coin = COLOR_YELLOW;
+            if(rand() % 2 == 0){
+                color_coin = COLOR_GOLD;
+            }
+            Coin coin = Coin(randomX, randomY, 0.2, 0, color_coin);
+            coins.push_back(coin);
+        }
     }
 
     sort(coins.begin(), coins.end());
@@ -334,6 +362,21 @@ bool detect_collision_player_boom(Boomerang &boome){
     return collided;
 }
 
+bool detect_collision_player_shield(){
+    bool collided = detect_collision(player.bounding_box(), sheild.bounding_box());
+    return collided;
+}
+
+void on_Collide_jetpack_player(){
+    //restrict jetpack to move further
+    jet.position.x = player.position.x - (jet.width /2.0 + player.width / 2.0);
+}
+
+void on_Collide_sheild_player(){
+    //activate sheild
+    sheild.activate();
+}
+
 void detect_collisions_all(){
     //jetpack and player
     if (detect_collision(jet.bounding_box(), player.bounding_box())) {
@@ -346,7 +389,7 @@ void detect_collisions_all(){
     for (int i = lb_index ; i < ub_index ; i++){
         if(detect_collision(coins[i].bounding_box(), player.bounding_box())){
             cout << "Score ++ bro good for you " << i << endl;
-            score_match++;
+            score_match+=coins[i].score;
             cout << "Curr score " << score_match << endl;
             coins.erase(coins.begin() + i); //delete coin
         }
@@ -370,8 +413,19 @@ void detect_collisions_all(){
     //player and firebeam or fireangledbeam
     for (int i=0; i < firebeams.size(); i++){
         if (detect_collision(player.bounding_box(), firebeams[i].bounding_box())){
-            if (!firebeams[i].disabled){
+            if (!firebeams[i].disabled && !sheild.active){
                 //kill health
+                player.lives--;
+                firebeams[i].disabled = true;
+                firebeams[i].refresh();
+                cout << "Lives " << player.lives << endl;
+            } else if (!firebeams[i].disabled && sheild.active) {
+                sheild.deactivate();
+                firebeams[i].disabled = true;
+                firebeams[i].refresh();
+                cout << "Deactviating sheild" << endl;
+            } else {
+
             }
         }
     }
@@ -385,10 +439,27 @@ void detect_collisions_all(){
     //player and boomerang
     if (detect_collision_player_boom(boom)){
         cout << "BOOOM" << endl;
+        if (sheild.active){
+            sheild.deactivate();
+        } else {
+            player.lives--;
+        }
     }
+
+    //player and sheild
+    if (detect_collision_player_shield()) {
+        if (sheild.active){
+            sheild.deactivate();
+        }
+        on_Collide_sheild_player();
+    }
+
 }
 
 int main(int argc, char **argv) {
+
+    // system("aplay ./src/mario_coin_sound.mp3 &");
+    system("ffplay -nodisp -autoexit src/mario_coin_sound.mp3 >/dev/null 2>&1 &");
 
     //init glut
     glutInit( & argc, argv );

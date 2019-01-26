@@ -10,10 +10,15 @@ extern Player player;
 PowerupShield::PowerupShield(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
-    speedY = 0.05f;
+    speedY = 0.05;
+    speedX = 0.001;
     int n = 60;
+    this->color = color;
+    this->active = false;
+    initPosX = x;
+    initPosY = y;
 
-    float radius = 1;
+    float radius = 0.2;
     GLfloat vertex_buffer_data[3*3*n];
     GLfloat vertex_buffer_data2[3*3*n];
     for(int i=0;i<(9*(n));) {
@@ -35,12 +40,12 @@ PowerupShield::PowerupShield(float x, float y, color_t color) {
         vertex_buffer_data2[i++]=0.0;
         vertex_buffer_data2[i++]=0.0;
 
-        vertex_buffer_data2[i++]=cos((i/9)*(((float)2*M_PI)/n)) * (radius - 0.3);
-        vertex_buffer_data2[i++]=sin((i/9)*(((float)2*M_PI)/n)) * (radius - 0.3);
+        vertex_buffer_data2[i++]=cos((i/9)*(((float)2*M_PI)/n)) * (radius - 0.1);
+        vertex_buffer_data2[i++]=sin((i/9)*(((float)2*M_PI)/n)) * (radius - 0.1);
         vertex_buffer_data2[i++]=0.0;
 
-        vertex_buffer_data2[i++]=cos(((i/9)+1)*(((float)2*M_PI)/n)) * (radius - 0.3);
-        vertex_buffer_data2[i++]=sin(((i/9)+1)*(((float)2*M_PI)/n)) * (radius - 0.3);
+        vertex_buffer_data2[i++]=cos(((i/9)+1)*(((float)2*M_PI)/n)) * (radius - 0.1);
+        vertex_buffer_data2[i++]=sin(((i/9)+1)*(((float)2*M_PI)/n)) * (radius - 0.1);
         vertex_buffer_data2[i++]=0.0;
     }
 
@@ -50,13 +55,6 @@ PowerupShield::PowerupShield(float x, float y, color_t color) {
 
     this->object = create3DObject(GL_TRIANGLES, (n) * 3, vertex_buffer_data, color, GL_FILL);
     this->object2 = create3DObject(GL_TRIANGLES, (n) * 3, vertex_buffer_data2, COLOR_BACKGROUND, GL_FILL);
-
-    
-    int num_triangles = 2;
-    this->width = 0.1;
-    this->height = 0.1;
-
-    this->object = create3DObject(GL_TRIANGLES, num_triangles*3, vertex_buffer_data, color, GL_FILL);
 }
 
 void PowerupShield::draw(glm::mat4 VP) {
@@ -89,17 +87,74 @@ bool PowerupShield::onscreen(){
     return !offscreenX;
 }
 
+void PowerupShield::activate(){
+    active = true;
+    int n = 60;
+
+    float radius = 1;
+    GLfloat vertex_buffer_data[3*3*n];
+    GLfloat vertex_buffer_data2[3*3*n];
+    for(int i=0;i<(9*(n));) {
+        vertex_buffer_data[i++]=0.0;
+        vertex_buffer_data[i++]=0.0;
+        vertex_buffer_data[i++]=0.0;
+
+        vertex_buffer_data[i++]=cos((i/9)*(((float)2*M_PI)/n)) * radius;
+        vertex_buffer_data[i++]=sin((i/9)*(((float)2*M_PI)/n)) * radius;
+        vertex_buffer_data[i++]=0.0;
+
+        vertex_buffer_data[i++]=cos(((i/9)+1)*(((float)2*M_PI)/n)) * radius;
+        vertex_buffer_data[i++]=sin(((i/9)+1)*(((float)2*M_PI)/n)) * radius;
+        vertex_buffer_data[i++]=0.0;
+    }
+
+    for(int i=0;i<(9*(n));) {
+        vertex_buffer_data2[i++]=0.0;
+        vertex_buffer_data2[i++]=0.0;
+        vertex_buffer_data2[i++]=0.0;
+
+        vertex_buffer_data2[i++]=cos((i/9)*(((float)2*M_PI)/n)) * (radius - 0.1);
+        vertex_buffer_data2[i++]=sin((i/9)*(((float)2*M_PI)/n)) * (radius - 0.1);
+        vertex_buffer_data2[i++]=0.0;
+
+        vertex_buffer_data2[i++]=cos(((i/9)+1)*(((float)2*M_PI)/n)) * (radius - 0.1);
+        vertex_buffer_data2[i++]=sin(((i/9)+1)*(((float)2*M_PI)/n)) * (radius - 0.1);
+        vertex_buffer_data2[i++]=0.0;
+    }
+
+
+    this->width = 2.0f * radius;
+    this->height = 2.0f * radius;
+
+    this->object = create3DObject(GL_TRIANGLES, (n) * 3, vertex_buffer_data, color, GL_FILL);
+    this->object2 = create3DObject(GL_TRIANGLES, (n) * 3, vertex_buffer_data2, COLOR_BACKGROUND, GL_FILL);
+}
+
+void PowerupShield::deactivate(){
+    this->active = false;
+
+    GLfloat s[] = {};
+    this->object = create3DObject(GL_TRIANGLES, 0, s, COLOR_BACKGROUND, GL_FILL);
+    this->object2 = create3DObject(GL_TRIANGLES, 0, s, COLOR_BACKGROUND, GL_FILL);
+}
+
 void PowerupShield::tick() {
     // std::cout << "ticking" << std::endl;
     // this->rotation += speedX;
-    curr_time = getEpochTime();
-    this->rotation ++ ;
-    this->position.y -= (/* player.speedX + */ speedY);
+    if (!active){
+        curr_time = getEpochTime();
+        // rotation ++ ;
 
-    int64_t t = (this->curr_time - this->start_time);
+        int64_t t = (curr_time - start_time);
 
-    this->position.x = this->initPosX - (speedX * t) + (0.5f * gravityX * t * t);
-    // this->position.y -= speed;
+        position.x = initPosX + speedX * t;
+        position.y = initPosY + 3 * sin(position.x * 5);
+    } else {
+        position.x = player.position.x - 0.2;
+        position.y = player.position.y - 0.3;
+    }
+    
+    // position.y -= speed;
 }
 
 bounding_box_t PowerupShield::bounding_box() {
@@ -108,6 +163,6 @@ bounding_box_t PowerupShield::bounding_box() {
     bbox.y = this->position.y;
     bbox.width = this->width;
     bbox.height = this->height;
-    bbox.type = types_shapes_t::RECTANGLE;
+    bbox.type = types_shapes_t::CIRLCE;
     return bbox;
 }

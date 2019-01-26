@@ -8,6 +8,10 @@ Coin::Coin(float x, float y, float radius, float angle, color_t color) {
     this->rotation = angle;
     this->color = color;
     this->disabled = false;
+    this->score = 1;
+    if (color.r == COLOR_GOLD.r && color.g == COLOR_GOLD.g && color.b == COLOR_GOLD.b){
+        this->score = 5;
+    }
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     int n = 20;

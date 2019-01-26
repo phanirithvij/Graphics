@@ -24,6 +24,7 @@ public:
     void refresh();
     void disable();
     bool disabled;
+    int score;
     bounding_box_t bounding_box();
 private:
     VAO *object;

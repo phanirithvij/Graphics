@@ -19,6 +19,7 @@ public:
     bool onscreen();
     bool visited();
     void actforces();
+    void disappear();
     color_t color;
     bounding_box_t bounding_box();
 private:

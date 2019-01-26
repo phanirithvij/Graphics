@@ -13,4 +13,6 @@ const color_t COLOR_MAGNET = { 78, 76, 75 };
 const color_t COLOR_JETPACK = { 184, 159, 87 };
 const color_t COLOR_SKYBLUE = { 36, 187, 255 };
 const color_t COLOR_GREY = { 103, 101, 106 };
+const color_t COLOR_GOLD = { 128, 128, 0 };
+const color_t COLOR_SILVER = { 192, 192, 192 };
 const color_t COLOR_RED2 = { 241, 113, 28 };
