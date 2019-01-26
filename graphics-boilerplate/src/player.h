@@ -23,6 +23,7 @@ public:
     double height;
     bool isFlying;
     int lives;
+    bool onTunnel;
     int64_t start_time;
     int64_t curr_time;
     bounding_box_t bounding_box();

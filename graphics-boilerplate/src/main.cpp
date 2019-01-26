@@ -367,6 +367,11 @@ bool detect_collision_player_shield(){
     return collided;
 }
 
+bool detect_collision_player_life(){
+    bool collided = detect_collision(player.bounding_box(), life_up.bounding_box());
+    return collided;
+}
+
 void on_Collide_jetpack_player(){
     //restrict jetpack to move further
     jet.position.x = player.position.x - (jet.width /2.0 + player.width / 2.0);
@@ -452,6 +457,12 @@ void detect_collisions_all(){
             sheild.deactivate();
         }
         on_Collide_sheild_player();
+    }
+
+    //player and life
+    if (detect_collision_player_life() && !life_up.destroyed){
+        life_up.activate();
+        life_up.destroyed = true;
     }
 
 }

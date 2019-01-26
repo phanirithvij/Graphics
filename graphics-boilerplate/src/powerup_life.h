@@ -26,6 +26,7 @@ public:
     bool onscreen();
     void activate();
     bool active;
+    bool destroyed;
     void deactivate();
     color_t color;
     bounding_box_t bounding_box();

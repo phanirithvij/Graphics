@@ -14,6 +14,7 @@ PowerupLife::PowerupLife(float x, float y, color_t color) {
     speedX = 0.001;
     this->color = color;
     this->active = false;
+    destroyed = false;
     initPosX = x;
     initPosY = y;
 
@@ -80,6 +81,12 @@ bool PowerupLife::onscreen(){
 
 void PowerupLife::activate(){
     player.lives++;
+    GLfloat vertbuff[] = {};
+    this->object = create3DObject(GL_TRIANGLES, 0, vertbuff, color, GL_FILL);    
+}
+
+void PowerupLife::deactivate(){
+    active = false;
     GLfloat vertbuff[] = {};
     this->object = create3DObject(GL_TRIANGLES, 0, vertbuff, color, GL_FILL);    
 }

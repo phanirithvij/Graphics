@@ -13,6 +13,7 @@ Player::Player(float x, float y, color_t color) {
     speedY = 0.1f;
     gravityY = 0.0000009f;
     lives = 7;
+    onTunnel = false;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     // static const GLfloat vertex_buffer_data[] = {
@@ -103,6 +104,7 @@ void Player::floatup(){
 }
 
 void Player::actforces(double start_postion){
+
     double accln = this->gravityY;
 
     int64_t timenow = /* (int64_t) */(this->curr_time - this->start_time);
