@@ -53,7 +53,6 @@ void draw() {
     // use the loaded shader program
     // Don't change unless you know what you are doing
     glUseProgram (programID);
-
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
     glm::vec3 up (0, 1, 0);
 
@@ -140,7 +139,7 @@ void tick_input(GLFWwindow *window) {
     if (right) {
         // if (player.position.x < screen_center_x + 4.0){
         player.moveH(1);
-        cout << "POS X : " << player.position.x << endl;
+        std::cout << "POS X : " << player.position.x << std::endl;
         jet.moveH(1);
         // }
         if (player.position.x > screen_center_x){
@@ -183,7 +182,6 @@ void createParticles(){
 }
 
 void tick_elements() {
-
     createParticles();
 
     jet.tick();
@@ -211,12 +209,10 @@ void tick_elements() {
 
 void on_Collide_jetpack_player(){
     //restrict jetpack to move further
-    jet.position.x = player.position.x - (player.width / 2.0f + jet.width / 2.0f);
 }
 
-/* Initialize the OpenGL rendering properties */
-/* Add all the models to be created here */
-void initGL(GLFWwindow *window, int width, int height) {
+
+void initGL(GLFWwindow *window, int width, int height){
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
@@ -270,7 +266,6 @@ void initGL(GLFWwindow *window, int width, int height) {
     cout << "VERSION: " << glGetString(GL_VERSION) << endl;
     cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 }
-
 
 void detect_collisions_all(){
     //jetpack and player
