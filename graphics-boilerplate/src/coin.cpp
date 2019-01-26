@@ -15,22 +15,15 @@ Coin::Coin(float x, float y, float radius, float angle, color_t color) {
         vertex_buffer_data[i++]=0.0;
         vertex_buffer_data[i++]=0.0;
         vertex_buffer_data[i++]=0.0;
-        
+
         vertex_buffer_data[i++]=cos((i/9)*(((float)2*M_PI)/n)) * radius;
         vertex_buffer_data[i++]=sin((i/9)*(((float)2*M_PI)/n)) * radius;
         vertex_buffer_data[i++]=0.0;
-        
+
         vertex_buffer_data[i++]=cos(((i/9)+1)*(((float)2*M_PI)/n)) * radius;
         vertex_buffer_data[i++]=sin(((i/9)+1)*(((float)2*M_PI)/n)) * radius;
         vertex_buffer_data[i++]=0.0;
     }
-
-    // GLfloat x_ = vertex_buffer_data[3];
-    // GLfloat y_ = vertex_buffer_data[4];
-
-    // double sqradius = (x_ * x_ + y_ * y_);
-
-    // double radius = sqrt(sqradius);
 
     this->width = 2.0f * radius;
     this->height = 2.0f * radius;
@@ -72,13 +65,6 @@ Coin::Coin(float x, float y, float radius, color_t color) {
         vertex_buffer_data[i++]=0.0;
     }
 
-    // GLfloat x_ = vertex_buffer_data[3];
-    // GLfloat y_ = vertex_buffer_data[4];
-
-    // double sqradius = (x_ * x_ + y_ * y_);
-
-    // double radius = sqrt(sqradius);
-
     this->width = 2.0f * radius;
     this->height = 2.0f * radius;
 
@@ -98,7 +84,7 @@ void Coin::draw(glm::mat4 VP) {
 }
 
 void Coin::draw(glm::mat4 VP, float xoffset) {
-    std::cout << "Angle, XOFF " << this->rotation << " " << xoffset << std::endl; 
+    // std::cout << "Angle, XOFF " << this->rotation << " " << xoffset << std::endl;
     Matrices.model = glm::mat4(1.0f);
     glm::mat4 translate = glm::translate (this->position);    // glTranslatef
     glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
@@ -127,12 +113,7 @@ bool Coin::visited(){
     return (this->position.x < screen_center_x - 4.0);
 }
 
-void Coin::tick(float speed) {
-    // std::cout << "ticking" << std::endl;
-    // this->rotation += speed;
-    // this->position.x -= speed;
-    // this->position.y -= speed;
-}
+void Coin::tick(float speed) {}
 
 bounding_box_t Coin::bounding_box() {
     bounding_box_t bbox;

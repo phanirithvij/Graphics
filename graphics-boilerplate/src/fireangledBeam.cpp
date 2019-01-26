@@ -12,7 +12,7 @@ FireBeamAngled::FireBeamAngled(float x, float y, float width, float angle, color
     part_radius = 0.2;
 
     // me: bebop, love: I know, me: wtf is wrong with me, love: I know right
-    static GLfloat vertex_buffer_data[] = {
+    GLfloat vertex_buffer_data[] = {
         4.0,   0.1, 0.0,
         4.0,  -0.1, 0.0, //
         -4.0, -0.1, 0.0,
@@ -44,6 +44,7 @@ void FireBeamAngled::draw(glm::mat4 VP) {
     float xoff = this->width/2.0 + part_radius;
     this->part1.draw(VP, -xoff);
     this->part2.draw(VP, xoff);
+
     Matrices.model = glm::mat4(1.0f);
     glm::mat4 translate = glm::translate (this->position);    // glTranslatef
     glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));

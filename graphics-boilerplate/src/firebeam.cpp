@@ -9,13 +9,13 @@ FireBeam::FireBeam(float x, float y, float width, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
     this->speedX = 0;
-    this->speedY = 0.2;
+    this->speedY = 0.01;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     part_radius = 0.2;
 
     // me: bebop, love: I know, me: wtf is wrong with me, love: I know right
-    static GLfloat vertex_buffer_data[] = {
+    GLfloat vertex_buffer_data[] = {
         4.0,   0.1, 0.0,
         4.0,  -0.1, 0.0, //
         -4.0, -0.1, 0.0,
@@ -26,7 +26,7 @@ FireBeam::FireBeam(float x, float y, float width, color_t color) {
     };
 
     double scale = width / 8.0;
-    int num_triangles = 2;    
+    int num_triangles = 2;
 
     this->width = 8.0f * scale;
     this->height = 0.2f * scale;
@@ -47,7 +47,7 @@ void FireBeam::draw(glm::mat4 VP) {
     Matrices.model = glm::mat4(1.0f);
     glm::mat4 translate = glm::translate (this->position);    // glTranslatef
     glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(1, 0, 0));
-    // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
+    // // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
     rotate          = rotate * glm::translate(glm::vec3(0, -0.6, 0));
     Matrices.model *= (translate * rotate);
     glm::mat4 MVP = VP * Matrices.model;
@@ -77,11 +77,14 @@ void FireBeam::moveY(int direction){
 }
 
 void FireBeam::tick() {
+    this->moveY(1);
     if (this->position.y > screen_center_y + 2.0){
-        this->moveY(-1);
+        this->speedY = -this->speedY;
     } else if (this->position.y < screen_center_y - 2.0) {
-        this->moveY(1);
+        this->speedY = -this->speedY;
     }
+    this->part1.position.y = this->position.y;
+    this->part2.position.y = this->position.y;
 }
 
 bounding_box_t FireBeam::bounding_box() {

@@ -28,7 +28,6 @@ Player player;
 Platform plat;
 Jetpack jet;
 Balloon showballoon;
-FireBeam fbeam;
 FireBeamAngled fbangled;
 Magnet m_mag;
 
@@ -36,6 +35,8 @@ vector<Jetparticle> j_particles;
 vector<Balloon> balloonlist;
 vector<Coin> coins;
 vector<FireBeam> firebeams;
+vector<FireBeamAngled> fbangledvec;
+vector<Magnet> magnets;
 
 int score_match = 0;
 
@@ -58,8 +59,11 @@ void draw() {
 
     // Eye - Location of camera. Don't change unless you are sure!!
     glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f), 0, 5*sin(camera_rotation_angle*M_PI/180.0f) );
+    // glm::vec3 eye ( 10*cos(camera_rotation_angle*M_PI/180.0f) + player.position.x, player.position.y, 10*sin(camera_rotation_angle*M_PI/180.0f) );
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
     glm::vec3 target (0, 0, 0);
+
+    // glm::vec3 target (0, player.position.x, player.position.y);
     // Compute Camera matrix (view)
     Matrices.view = glm::lookAt( eye, target, up ); // Rotating Camera for 3D
     // Don't change unless you are sure!!
@@ -109,8 +113,11 @@ void draw() {
         } else balloonlist[i].draw(VP);
     }
 
-    fbeam.draw(VP);
     fbangled.draw(VP);
+
+    for (int i=0; i < firebeams.size(); i++){
+        firebeams[i].draw(VP);
+    }
 
 }
 
@@ -139,7 +146,7 @@ void tick_input(GLFWwindow *window) {
     if (right) {
         // if (player.position.x < screen_center_x + 4.0){
         player.moveH(1);
-        std::cout << "POS X : " << player.position.x << std::endl;
+        // std::cout << "POS X : " << player.position.x << std::endl;
         jet.moveH(1);
         // }
         if (player.position.x > screen_center_x){
@@ -202,7 +209,9 @@ void tick_elements() {
         j_particles[i].tick();
     }
 
-    fbeam.tick();
+    for (int i=0; i < firebeams.size(); i++){
+        firebeams[i].tick();
+    }
     // camera_rotation_angle += 1;
     // cout << camera_rotation_angle << endl;
 }
@@ -220,6 +229,7 @@ void initGL(GLFWwindow *window, int width, int height){
     player         = Player(-2.0f, 0.0f, COLOR_GREEN);
     jet            = Jetpack(-2.0f, 0.0f, COLOR_ORANGE);
     showballoon    = Balloon(-2.0 - (player.width / 2.0), 0.0, COLOR_MIDNIGHTBLUE);
+    m_mag          = Magnet(0, 0, 1.0, COLOR_RED);
 
     int num_coins = 100;
 
@@ -243,9 +253,13 @@ void initGL(GLFWwindow *window, int width, int height){
 
     //set start time for the first time
     player.start_time = getEpochTime();
-
-    fbeam = FireBeam(0, 0, 3.0, COLOR_MIDNIGHTBLUE);
-    fbangled = FireBeamAngled(0, 0, 3.0, 45, COLOR_MIDNIGHTBLUE);
+    
+    for(int i=0; i < 10; i++){
+        FireBeam firebeam = FireBeam(i * 4, 0, 3.0, COLOR_ORANGE);
+        firebeams.push_back(firebeam);
+    }
+    
+    fbangled = FireBeamAngled(0, 0, 3.0, 45, COLOR_ORANGE);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -273,38 +287,20 @@ void detect_collisions_all(){
         on_Collide_jetpack_player();
     }
     //player coins
-    for (int i=0; i<coins.size(); i++){
-        if (coins[i].onscreen()){
-            if(detect_collision(coins[i].bounding_box(), player.bounding_box())){
-                cout << "Score ++ bro good for you " << i << endl;
-                score_match++;
-                cout << "Curr score " << score_match << endl;
-                coins.erase(coins.begin() + i); //delete coin
-            }
-        } else if (coins[i].visited()){
-            cout << "Bet the position is negative " << coins[i].position.x << endl;
-            cout << "DONE FOR " << i << " " << "Baby" << endl;
-            coins.erase(coins.begin() + i); // delete coin if out of screen
+    int lb_index = lower_bound(coins.begin(), coins.end(), player.position.x - 1) - coins.begin();
+    int ub_index = upper_bound(coins.begin(), coins.end(), player.position.x + 1) - coins.begin();
+
+    for (int i = lb_index ; i < ub_index ; i++){
+        if(detect_collision(coins[i].bounding_box(), player.bounding_box())){
+            cout << "Score ++ bro good for you " << i << endl;
+            score_match++;
+            cout << "Curr score " << score_match << endl;
+            coins.erase(coins.begin() + i); //delete coin
         }
     }
+
     //water balloon firebeam or fireangledbeam
-    // cout << "LOB " << lower_bound(coins.begin(), coins.end(), Coin(player.position.x - 2, 0, 0, COLOR_BLACK)) - coins.begin()<< endl;
-    // cout << "UPB " << upper_bound(coins.begin(), coins.end(), Coin(player.position.x + 2, 0, 0, COLOR_BLACK)) - coins.begin()<< endl;
 
-    /* cout << "LOB " <<  */int lb = lower_bound(coins.begin(), coins.end(), player.position.x - 1) - coins.begin(); /* << endl; */
-    /* cout << "UPB " <<  */int ub = upper_bound(coins.begin(), coins.end(), player.position.x + 1) - coins.begin(); /* << endl; */
-    cout << "Size " << coins.size() << endl;
-    cout << "LB " << lb << " UB " << ub << endl;
-
-    for (int i = lb ; i < ub ; i++){
-        coins[i].position.y = 0;
-    }
-    
-    for (int i = 0 ; i < coins.size() ; i++){
-        if((i < lb || i >= ub) && coins[i].position.y == 0) {
-            coins[i].position.y = -2;
-        }
-    }
 
     //player and firebeam or fireangledbeam
 

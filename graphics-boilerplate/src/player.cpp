@@ -22,7 +22,7 @@ Player::Player(float x, float y, color_t color) {
     //     -0.5f, 0.5f, 0.0f,
     //     0.5f, 0.5f, 0.0f// triangle 2 : end
     // };
-    static GLfloat vertex_buffer_data[] = {
+    GLfloat vertex_buffer_data[] = {
         -(1/3.0), -0.4f, 0.0f,
         (1/3.0),  -0.4f, 0.0f, // triangle 1 body down
         (1/3.0),   0.4f, 0.0f,

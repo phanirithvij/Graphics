@@ -11,7 +11,7 @@ Magnet::Magnet(float x, float y, float radius, color_t color) {
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     int n = 20;
     GLfloat vertex_buffer_data[3*3*n];
-    for(int i=0;i<9*n;) {
+    for(int i=0;i<(9*n / 2);) {
         vertex_buffer_data[i++]=0.0;
         vertex_buffer_data[i++]=0.0;
         vertex_buffer_data[i++]=0.0;
