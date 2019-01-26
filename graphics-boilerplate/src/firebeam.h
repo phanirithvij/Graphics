@@ -18,11 +18,14 @@ public:
     double part_radius;
     double width;
     double height;
+    bool disabled;
     bool onscreen();
     bool visited();
+    void refresh();
     void moveY(int direction);
     Coin part2;
     Coin part1;
+    color_t color;
     bounding_box_t bounding_box();
 private:
     VAO *object;

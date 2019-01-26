@@ -16,6 +16,13 @@ pkg_check_modules(GLEW REQUIRED glew)
 include_directories(${GLEW_INCLUDE_DIRS})
 target_link_libraries (${PROJECT_NAME} ${GLEW_LIBRARIES})
 
+find_package(GLUT REQUIRED)
+pkg_check_modules(GLUT REQUIRED)
+include_directories(${GLUT_INCLUDE_DIRS})
+target_link_libraries (${PROJECT_NAME} ${GLUT_LIBRARIES})
+
+#include_directories( ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} )
+
 if (NOT APPLE)
   pkg_check_modules(GL REQUIRED gl)
   include_directories(${GL_INCLUDE_DIRS})

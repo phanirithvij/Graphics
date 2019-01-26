@@ -7,6 +7,8 @@
 FireBeamAngled::FireBeamAngled(float x, float y, float width, float angle, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = angle;
+    this->disabled = false;
+    this->color = color;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     part_radius = 0.2;

@@ -21,6 +21,9 @@ public:
     bool onscreen();
     bool visited();
     color_t color;
+    void refresh();
+    void disable();
+    bool disabled;
     bounding_box_t bounding_box();
 private:
     VAO *object;

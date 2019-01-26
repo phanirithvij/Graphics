@@ -19,6 +19,8 @@ public:
     double height;
     bool onscreen();
     bool visited();
+    bool disabled;
+    color_t color;
     Coin part2;
     Coin part1;
     bounding_box_t bounding_box();

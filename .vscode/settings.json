@@ -34,6 +34,7 @@
         "typeinfo": "cpp",
         "utility": "cpp",
         "ctime": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "string": "cpp"
     }
 }

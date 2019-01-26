@@ -12,7 +12,10 @@
 #include "firebeam.h"
 #include "fireangledBeam.h"
 #include "magnet.h"
+#include "collisionfuncs.h"
 #include <chrono>
+
+#include "GL/glut.h"
 
 using namespace std;
 
@@ -29,7 +32,6 @@ Platform plat;
 Jetpack jet;
 Balloon showballoon;
 FireBeamAngled fbangled;
-Magnet m_mag;
 
 vector<Jetparticle> j_particles;
 vector<Balloon> balloonlist;
@@ -96,11 +98,20 @@ void draw() {
         }
     }
 
+    for (int i=0; i < magnets.size(); i++){
+        magnets[i].draw(VP);
+    }
+
+    for (int i=0; i < firebeams.size(); i++){
+        firebeams[i].draw(VP);
+    }
+
+    fbangled.draw(VP);
+
     player.draw(VP);
     showballoon.draw(VP);
     jet.draw(VP);
-    // fbeam.part1.draw(VP);
-    // fbeam.part2.draw(VP);
+
     for (int i=0; i < balloonlist.size(); i++){
         (balloonlist[i].position.y > screen_center_y + 4.5f) ? balloonlist[i].position.y = screen_center_y + 4.5f : 1;
 
@@ -110,15 +121,11 @@ void draw() {
 
         if (!balloonlist[i].onscreen()){
             balloonlist.erase(balloonlist.begin() + i); // delete the balloon
-        } else balloonlist[i].draw(VP);
+        } else {
+            cout << "Drawing balloon" << endl;
+            balloonlist[i].draw(VP);
+        }
     }
-
-    fbangled.draw(VP);
-
-    for (int i=0; i < firebeams.size(); i++){
-        firebeams[i].draw(VP);
-    }
-
 }
 
 void tick_input(GLFWwindow *window) {
@@ -128,7 +135,12 @@ void tick_input(GLFWwindow *window) {
     int upkey = glfwGetKey(window, GLFW_KEY_UP);
     int balloonkey = glfwGetKey(window, GLFW_KEY_S);
     int anglekey = glfwGetKey(window, GLFW_KEY_DOWN);
+    // int camerakey = glfwGetKey(window, GLFW_KEY_C);
 
+    // if (camerakey){
+    //     camera_rotation_angle ++ ;
+    // }
+    
     if (anglekey) {
         fbangled.rotation++;
         fbangled.part1.rotation++;
@@ -152,7 +164,7 @@ void tick_input(GLFWwindow *window) {
         if (player.position.x > screen_center_x){
             plat.position.x += player.speedX;
             screen_center_x += player.speedX;
-            std::cout<<plat.position.x<<" "<<screen_center_x<<std::endl;
+            // std::cout<<plat.position.x<<" "<<screen_center_x<<std::endl;
         }
     }
 
@@ -162,7 +174,7 @@ void tick_input(GLFWwindow *window) {
     }
 
     if (balloonkey) {
-        Balloon balloon = Balloon(player.position.x - (player.width / 2.0), player.position.y, COLOR_MIDNIGHTBLUE);
+        Balloon balloon = Balloon(player.position.x - (player.width / 2.0), player.position.y, COLOR_SKYBLUE);
         balloon.start_time = getEpochTime();
         balloonlist.push_back(balloon);
     }
@@ -226,10 +238,9 @@ void initGL(GLFWwindow *window, int width, int height){
     // Create the models
 
     plat           = Platform(0.0f, -3.0f, COLOR_RED);
-    player         = Player(-2.0f, 0.0f, COLOR_GREEN);
-    jet            = Jetpack(-2.0f, 0.0f, COLOR_ORANGE);
-    showballoon    = Balloon(-2.0 - (player.width / 2.0), 0.0, COLOR_MIDNIGHTBLUE);
-    m_mag          = Magnet(0, 0, 1.0, COLOR_RED);
+    player         = Player(-2.0f, 0.0f, COLOR_MIDNIGHTBLUE);
+    jet            = Jetpack(-2.0f, 0.0f, COLOR_JETPACK);
+    showballoon    = Balloon(-2.0 - (player.width / 2.0), 0.0, COLOR_SKYBLUE);
 
     int num_coins = 100;
 
@@ -255,8 +266,13 @@ void initGL(GLFWwindow *window, int width, int height){
     player.start_time = getEpochTime();
     
     for(int i=0; i < 10; i++){
-        FireBeam firebeam = FireBeam(i * 4, 0, 3.0, COLOR_ORANGE);
+        FireBeam firebeam = FireBeam(i * 10, ydist(gen), 3.0, COLOR_ORANGE);
         firebeams.push_back(firebeam);
+    }
+
+    for (int i=0; i < 1 ; i++){
+        Magnet m_mag = Magnet(i * 10, 0, 0.5, COLOR_MAGNET);
+        magnets.push_back(m_mag);
     }
     
     fbangled = FireBeamAngled(0, 0, 3.0, 45, COLOR_ORANGE);
@@ -281,6 +297,11 @@ void initGL(GLFWwindow *window, int width, int height){
     cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 }
 
+bool detect_collision_waterballoon_firebeam(const Balloon &wb, const FireBeam &fb){
+    bool detected = linePoint(fb.part1.position.x, fb.part1.position.y,fb.part2.position.x, fb.part2.position.y  ,wb.position.x, wb.position.y);
+    return detected;
+}
+
 void detect_collisions_all(){
     //jetpack and player
     if (detect_collision(jet.bounding_box(), player.bounding_box())) {
@@ -300,15 +321,44 @@ void detect_collisions_all(){
     }
 
     //water balloon firebeam or fireangledbeam
-
+    for (int i =0; i < balloonlist.size(); i++){
+        for (int j=0; j < firebeams.size(); j++){
+            if (firebeams[j].onscreen()){
+                if (detect_collision_waterballoon_firebeam(balloonlist[i], firebeams[j])){
+                    firebeams[j].disabled = true;
+                    firebeams[j].refresh();
+                    balloonlist.erase(balloonlist.begin() + i);
+                }
+            } else if(firebeams[j].visited()) {
+                firebeams.erase(firebeams.begin() + j);
+            }
+        }
+    }
 
     //player and firebeam or fireangledbeam
-
+    for (int i=0; i < firebeams.size(); i++){
+        if (detect_collision(player.bounding_box(), firebeams[i].bounding_box())){
+            if (!firebeams[i].disabled){
+                //kill health
+            }
+        }
+    }
+    for (int i=0; i < fbangledvec.size(); i++){
+        if (detect_collision(player.bounding_box(), fbangledvec[i].bounding_box())){
+            if (!fbangledvec[i].disabled){
+                //kill health
+            }
+        }
+    }
     //player and boomerang
 
 }
 
 int main(int argc, char **argv) {
+
+    //init glut
+    glutInit( & argc, argv );
+
     srand(time(0));
     int width  = 1000;
     int height = 1000;

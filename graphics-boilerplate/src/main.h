@@ -92,5 +92,9 @@ extern const color_t COLOR_BACKGROUND;
 extern const color_t COLOR_MIDNIGHTBLUE;
 extern const color_t COLOR_ORANGE;
 extern const color_t COLOR_YELLOW;
+extern const color_t COLOR_MAGNET;
+extern const color_t COLOR_JETPACK;
+extern const color_t COLOR_SKYBLUE;
+extern const color_t COLOR_GREY;
 
 #endif

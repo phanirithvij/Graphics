@@ -54,7 +54,7 @@ void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods) {
             break;
         case GLFW_KEY_X:{
 
-            Balloon balloon = Balloon(player.position.x - (player.width / 2.0), player.position.y, COLOR_MIDNIGHTBLUE);
+            Balloon balloon = Balloon(player.position.x - (player.width / 2.0), player.position.y, COLOR_SKYBLUE);
             balloon.start_time = getEpochTime();
             balloonlist.push_back(balloon);
             break;
@@ -83,7 +83,7 @@ void mouseButton(GLFWwindow *window, int button, int action, int mods) {
     case GLFW_MOUSE_BUTTON_LEFT:
         if (action == GLFW_PRESS) {
             // Do something
-                Balloon balloon = Balloon(player.position.x, player.position.y, COLOR_MIDNIGHTBLUE);
+                Balloon balloon = Balloon(player.position.x, player.position.y, COLOR_SKYBLUE);
                 balloon.start_time = getEpochTime();
                 balloonlist.push_back(balloon);
             return;

@@ -10,6 +10,8 @@ FireBeam::FireBeam(float x, float y, float width, color_t color) {
     this->rotation = 0;
     this->speedX = 0;
     this->speedY = 0.01;
+    this->disabled = false;
+    this->color = color;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     part_radius = 0.2;
@@ -85,6 +87,31 @@ void FireBeam::tick() {
     }
     this->part1.position.y = this->position.y;
     this->part2.position.y = this->position.y;
+}
+
+void FireBeam::refresh(){ 
+    GLfloat vertex_buffer_data[] = {
+        4.0,   0.1, 0.0,
+        4.0,  -0.1, 0.0, //
+        -4.0, -0.1, 0.0,
+
+        4.0,   0.1, 0.0,
+        -4.0,  0.1, 0.0, // 
+        -4.0, -0.1, 0.0
+    };
+
+    double scale = width / 8.0;
+    int num_triangles = 2;
+
+    for (int i=0; i < num_triangles * (3 * 3) ; i++){
+        vertex_buffer_data[i] *= scale;
+    }
+
+    if (this->disabled){
+        this->object = create3DObject(GL_TRIANGLES, num_triangles*3, vertex_buffer_data, COLOR_BACKGROUND, GL_FILL);
+        this->part1.disable();
+        this->part2.disable();
+    }
 }
 
 bounding_box_t FireBeam::bounding_box() {

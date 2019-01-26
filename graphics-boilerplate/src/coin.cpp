@@ -7,6 +7,7 @@ Coin::Coin(float x, float y, float radius, float angle, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = angle;
     this->color = color;
+    this->disabled = false;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     int n = 20;
@@ -41,6 +42,32 @@ bool operator<(const Coin &c, const float &f){
 
 bool operator<(const float &f, const Coin &c){
     return c.position.x > f;
+}
+
+void Coin::refresh(){
+    int n = 20;
+    GLfloat vertex_buffer_data[3*3*n];
+    for(int i=0;i<9*n;) {
+        vertex_buffer_data[i++]=0.0;
+        vertex_buffer_data[i++]=0.0;
+        vertex_buffer_data[i++]=0.0;
+
+        vertex_buffer_data[i++]=cos((i/9)*(((float)2*M_PI)/n)) * this->width / 2.0;
+        vertex_buffer_data[i++]=sin((i/9)*(((float)2*M_PI)/n)) * this->width / 2.0;
+        vertex_buffer_data[i++]=0.0;
+
+        vertex_buffer_data[i++]=cos(((i/9)+1)*(((float)2*M_PI)/n)) * this->width / 2.0;
+        vertex_buffer_data[i++]=sin(((i/9)+1)*(((float)2*M_PI)/n)) * this->width / 2.0;
+        vertex_buffer_data[i++]=0.0;
+    }
+
+    this->object = create3DObject(GL_TRIANGLES, n*3, vertex_buffer_data, this->color, GL_FILL);
+}
+
+void Coin::disable(){
+    this->disabled = true;
+    this->color = COLOR_GREY;
+    this->refresh();
 }
 
 Coin::Coin(float x, float y, float radius, color_t color) {

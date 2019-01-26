@@ -22,6 +22,7 @@ public:
     bounding_box_t bounding_box();
 private:
     VAO *object;
+    VAO *object2;
 };
 
 bool operator<(const Magnet &c1, const Magnet &c2);
